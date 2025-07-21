@@ -22,6 +22,22 @@ export default function FacultyProfilePage() {
     return source.find(item => item.id === itemId)?.name || 'Unknown Item';
   };
 
+  const getStatusVariant = (status: string) => {
+    switch (status) {
+      case 'Active':
+        return 'default';
+      case 'Pending':
+        return 'secondary';
+      case 'Completed':
+        return 'outline';
+      case 'Declined':
+      case 'Overdue':
+        return 'destructive';
+      default:
+        return 'secondary';
+    }
+  };
+
   return (
     <div className="container mx-auto">
       <PageHeader
@@ -80,7 +96,7 @@ export default function FacultyProfilePage() {
                       <TableCell>{format(res.start, 'MMM d, yyyy h:mm a')}</TableCell>
                       <TableCell>{format(res.end, 'MMM d, yyyy h:mm a')}</TableCell>
                       <TableCell>
-                        <Badge variant={res.status === 'Active' ? 'default' : res.status === 'Overdue' ? 'destructive' : 'secondary'}>
+                        <Badge variant={getStatusVariant(res.status)}>
                           {res.status}
                         </Badge>
                       </TableCell>

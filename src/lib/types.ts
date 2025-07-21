@@ -1,3 +1,4 @@
+
 export type Role = 'student' | 'faculty' | 'admin';
 
 export interface User {
@@ -38,5 +39,5 @@ export interface Reservation {
   start: Date;
   end: Date;
   purpose?: string;
-  status: 'Active' | 'Completed' | 'Overdue';
+  status: 'Active' | 'Completed' | 'Overdue' | 'Pending' | 'Declined';
 }
