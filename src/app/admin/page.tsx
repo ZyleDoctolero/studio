@@ -1,3 +1,4 @@
+
 'use client';
 import { PageHeader } from '@/components/shared/page-header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,16 +11,13 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell
 } from 'recharts';
 import { Activity, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
-import { equipment, rooms, reservations } from '@/lib/data';
-
-const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))'];
+import { useData } from '@/hooks/use-data';
 
 export default function AdminDashboardPage() {
+    const { equipment, rooms, reservations } = useData();
+
     const totalReservations = reservations.length;
     const activeReservations = reservations.filter(r => r.status === 'Active').length;
     const overdueItems = reservations.filter(r => r.status === 'Overdue').length;
@@ -34,12 +32,6 @@ export default function AdminDashboardPage() {
         bookings: reservations.filter(r => r.itemId === room.id).length,
     }));
     
-    const reservationStatusData = [
-        { name: 'Active', value: activeReservations },
-        { name: 'Completed', value: reservations.filter(r => r.status === 'Completed').length },
-        { name: 'Overdue', value: overdueItems }
-    ];
-
   return (
     <div>
       <PageHeader

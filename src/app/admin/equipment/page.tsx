@@ -1,5 +1,7 @@
+
 'use client';
 
+import React from 'react';
 import { PageHeader } from '@/components/shared/page-header';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,21 +19,42 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, PlusCircle } from 'lucide-react';
-import { equipment as allEquipment } from '@/lib/data';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
+import { useData } from '@/hooks/use-data';
+import { AddEquipmentForm } from '@/components/admin/add-equipment-form';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import type { Equipment } from '@/lib/types';
 
 export default function AdminEquipmentPage() {
+  const { equipment, addEquipment } = useData();
+  const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
+
+  const handleAddEquipment = (newEquipment: Omit<Equipment, 'id' | 'status'>) => {
+    addEquipment(newEquipment);
+    setIsAddModalOpen(false);
+  };
+
   return (
     <div>
       <PageHeader
         title="Equipment Management"
         description="Add, edit, and manage all AV equipment in the system."
       >
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add Equipment
-        </Button>
+        <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+            <DialogTrigger asChild>
+                <Button>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Add Equipment
+                </Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Add New Equipment</DialogTitle>
+                </DialogHeader>
+                <AddEquipmentForm onSubmit={handleAddEquipment} onCancel={() => setIsAddModalOpen(false)} />
+            </DialogContent>
+        </Dialog>
       </PageHeader>
       <div className="rounded-lg border">
         <Table>
@@ -46,7 +69,7 @@ export default function AdminEquipmentPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {allEquipment.map((item) => (
+            {equipment.map((item) => (
               <TableRow key={item.id}>
                 <TableCell>
                   <Image
@@ -64,7 +87,7 @@ export default function AdminEquipmentPage() {
                 <TableCell>
                   <Badge
                     variant={
-                      item.status === 'Available' ? 'secondary' : 'destructive'
+                      item.status === 'Available' ? 'secondary' : item.status === 'Unavailable' ? 'destructive' : 'default'
                     }
                   >
                     {item.status}

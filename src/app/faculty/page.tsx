@@ -1,8 +1,8 @@
+
 'use client';
 
 import React, { useState } from 'react';
 import { PageHeader } from '@/components/shared/page-header';
-import { equipment as allEquipment } from '@/lib/data';
 import type { EquipmentCategory } from '@/lib/types';
 import Image from 'next/image';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,22 +15,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { reservations } from '@/lib/data';
+import { useData } from '@/hooks/use-data';
 
 export default function FacultyDashboardPage() {
   const [filter, setFilter] = useState<EquipmentCategory | 'all'>('all');
+  const { equipment, reservations } = useData();
 
   const getAvailableCount = (equipmentId: string) => {
     const reservedCount = reservations.filter(r => r.itemId === equipmentId && r.status === 'Active' && r.itemType === 'equipment').length;
-    const totalCount = allEquipment.find(e => e.id === equipmentId)?.totalQuantity || 0;
+    const totalCount = equipment.find(e => e.id === equipmentId)?.totalQuantity || 0;
     return totalCount - reservedCount;
   };
   
   const filteredEquipment = filter === 'all' 
-    ? allEquipment 
-    : allEquipment.filter((item) => item.category === filter);
+    ? equipment 
+    : equipment.filter((item) => item.category === filter);
 
-  const categories = [...new Set(allEquipment.map(item => item.category))];
+  const categories = [...new Set(equipment.map(item => item.category))];
 
   return (
     <div className="container mx-auto">

@@ -1,16 +1,17 @@
+
 'use client';
 
 import React from 'react';
 import { PageHeader } from '@/components/shared/page-header';
-import { rooms } from '@/lib/data';
 import Image from 'next/image';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Users, MonitorSpeaker } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { reservations } from '@/lib/data';
+import { useData } from '@/hooks/use-data';
 
 export default function RoomBookingPage() {
+    const { rooms, reservations } = useData();
 
     const isRoomAvailable = (roomId: string) => {
         const now = new Date();

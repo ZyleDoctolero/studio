@@ -1,19 +1,21 @@
+
 'use client';
 
 import { PageHeader } from '@/components/shared/page-header';
 import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { reservations as allReservations, equipment, rooms } from '@/lib/data';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
+import { useData } from '@/hooks/use-data';
 
 export default function StudentProfilePage() {
   const { user } = useAuth();
+  const { reservations, equipment, rooms } = useData();
   
   if (!user) return null;
 
-  const userReservations = allReservations.filter(r => r.userId === user.id);
+  const userReservations = reservations.filter(r => r.userId === user.id);
 
   const getItemName = (itemId: string, itemType: 'equipment' | 'room') => {
     const source = itemType === 'equipment' ? equipment : rooms;

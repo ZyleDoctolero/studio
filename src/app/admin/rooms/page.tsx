@@ -1,3 +1,4 @@
+
 'use client';
 
 import { PageHeader } from '@/components/shared/page-header';
@@ -17,10 +18,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, PlusCircle } from 'lucide-react';
-import { rooms as allRooms } from '@/lib/data';
 import Image from 'next/image';
+import { useData } from '@/hooks/use-data';
 
 export default function AdminRoomsPage() {
+  const { rooms } = useData();
+  
   return (
     <div>
       <PageHeader
@@ -44,7 +47,7 @@ export default function AdminRoomsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {allRooms.map((room) => (
+            {rooms.map((room) => (
               <TableRow key={room.id}>
                 <TableCell>
                   <Image
