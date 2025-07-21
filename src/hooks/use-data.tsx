@@ -11,7 +11,7 @@ interface DataContextType {
   rooms: Room[];
   reservations: Reservation[];
   addEquipment: (newEquipment: Omit<Equipment, 'id' | 'status'>) => void;
-  // Add other functions for updating data here
+  addReservation: (itemId: string, userId: string, start: Date, end: Date, itemType: 'equipment' | 'room') => void;
 }
 
 export const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -37,11 +37,34 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     })
   }, [toast]);
 
+  const addReservation = useCallback((itemId: string, userId: string, start: Date, end: Date, itemType: 'equipment' | 'room') => {
+    setReservations(prev => {
+        const newReservation: Reservation = {
+            id: `res${prev.length + 1}`,
+            itemId,
+            userId,
+            start,
+            end,
+            itemType,
+            status: 'Active',
+        };
+        return [...prev, newReservation];
+    });
+    const itemName = itemType === 'equipment' 
+        ? equipment.find(e => e.id === itemId)?.name 
+        : rooms.find(r => r.id === itemId)?.name;
+    toast({
+        title: "Reservation Successful!",
+        description: `You have successfully reserved ${itemName}.`
+    })
+  }, [toast, equipment, rooms]);
+
   const value = {
     equipment,
     rooms,
     reservations,
     addEquipment,
+    addReservation,
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

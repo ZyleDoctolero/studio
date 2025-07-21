@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import { PageHeader } from '@/components/shared/page-header';
-import type { EquipmentCategory } from '@/lib/types';
+import type { EquipmentCategory, Equipment } from '@/lib/types';
 import Image from 'next/image';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,10 +16,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useData } from '@/hooks/use-data';
+import { ReserveItemDialog } from '@/components/reservations/reserve-item-dialog';
+
 
 export default function StudentDashboardPage() {
   const [filter, setFilter] = useState<EquipmentCategory | 'all'>('all');
-  const { equipment, reservations } = useData();
+  const { equipment, reservations, addReservation } = useData();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<Equipment | null>(null);
 
   const getAvailableCount = (equipmentId: string) => {
     const reservedCount = reservations.filter(r => r.itemId === equipmentId && r.status === 'Active' && r.itemType === 'equipment').length;
@@ -32,6 +36,11 @@ export default function StudentDashboardPage() {
     : equipment.filter((item) => item.category === filter);
 
   const categories = [...new Set(equipment.map(item => item.category))];
+
+  const handleReserveClick = (item: Equipment) => {
+    setSelectedItem(item);
+    setIsModalOpen(true);
+  };
 
   return (
     <div className="container mx-auto">
@@ -84,7 +93,7 @@ export default function StudentDashboardPage() {
                         </div>
                     </CardContent>
                     <CardFooter>
-                        <Button className="w-full" disabled={!isAvailable}>
+                        <Button className="w-full" disabled={!isAvailable} onClick={() => handleReserveClick(item)}>
                             {isAvailable ? 'Reserve' : 'Unavailable'}
                         </Button>
                     </CardFooter>
@@ -92,6 +101,15 @@ export default function StudentDashboardPage() {
             )
         })}
       </div>
+      {selectedItem && (
+        <ReserveItemDialog
+            item={selectedItem}
+            itemType='equipment'
+            isOpen={isModalOpen}
+            onOpenChange={setIsModalOpen}
+            onConfirm={addReservation}
+        />
+      )}
     </div>
   );
 }

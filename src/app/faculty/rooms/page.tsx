@@ -1,7 +1,7 @@
 
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { PageHeader } from '@/components/shared/page-header';
 import Image from 'next/image';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,9 +9,13 @@ import { Button } from '@/components/ui/button';
 import { Users, MonitorSpeaker } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useData } from '@/hooks/use-data';
+import { ReserveItemDialog } from '@/components/reservations/reserve-item-dialog';
+import type { Room } from '@/lib/types';
 
 export default function RoomBookingPage() {
-    const { rooms, reservations } = useData();
+    const { rooms, reservations, addReservation } = useData();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
 
     const isRoomAvailable = (roomId: string) => {
         const now = new Date();
@@ -22,6 +26,11 @@ export default function RoomBookingPage() {
             now >= r.start && now < r.end
         );
         return activeReservations.length === 0;
+    };
+    
+    const handleBookClick = (room: Room) => {
+      setSelectedRoom(room);
+      setIsModalOpen(true);
     };
 
   return (
@@ -67,7 +76,7 @@ export default function RoomBookingPage() {
                 </div>
               </CardContent>
               <CardFooter className="flex-col items-stretch gap-2">
-                <Button disabled={!available}>
+                <Button disabled={!available} onClick={() => handleBookClick(room)}>
                   {available ? 'Book Now' : 'Currently Booked'}
                 </Button>
                 <Button variant="outline">View Calendar</Button>
@@ -76,6 +85,15 @@ export default function RoomBookingPage() {
           )
         })}
       </div>
+      {selectedRoom && (
+        <ReserveItemDialog
+            item={selectedRoom}
+            itemType='room'
+            isOpen={isModalOpen}
+            onOpenChange={setIsModalOpen}
+            onConfirm={addReservation}
+        />
+      )}
     </div>
   );
 }
