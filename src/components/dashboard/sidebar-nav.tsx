@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -23,19 +24,21 @@ export function SidebarNav({ items }: SidebarNavProps) {
     <SidebarMenu>
       {items.map((item) => (
         <SidebarMenuItem key={item.href}>
-          <Link href={item.href} passHref legacyBehavior>
-            <SidebarMenuButton
-              isActive={pathname === item.href}
-              className={cn(
-                'group-data-[collapsible=icon]:justify-center',
-              )}
-            >
+          <SidebarMenuButton
+            asChild
+            isActive={pathname === item.href}
+            className={cn(
+              'group-data-[collapsible=icon]:justify-center',
+            )}
+            tooltip={item.label}
+          >
+            <Link href={item.href}>
               <item.icon className="h-5 w-5" />
               <span className="group-data-[collapsible=icon]:hidden">
                 {item.label}
               </span>
-            </SidebarMenuButton>
-          </Link>
+            </Link>
+          </SidebarMenuButton>
         </SidebarMenuItem>
       ))}
     </SidebarMenu>
