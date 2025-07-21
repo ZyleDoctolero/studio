@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { PageHeader } from '@/components/shared/page-header';
 import { equipment as allEquipment } from '@/lib/data';
-import type { Equipment, EquipmentCategory } from '@/lib/types';
+import type { EquipmentCategory } from '@/lib/types';
 import Image from 'next/image';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -76,7 +76,7 @@ export default function FacultyDashboardPage() {
                         <div>
                             <div className="flex justify-between text-sm mb-1">
                                 <span>Availability</span>
-                                <span>Status: {item.status}</span>
+                                <span>{availableCount} / {item.totalQuantity}</span>
                             </div>
                             <Progress value={(availableCount / item.totalQuantity) * 100} />
                         </div>
