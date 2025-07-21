@@ -154,9 +154,10 @@ export function ReserveItemDialog({ item, itemType, isOpen, onOpenChange, onConf
                             mode="single"
                             selected={field.value}
                             onSelect={field.onChange}
-                            disabled={(date) =>
-                                date < (form.getValues('start') || new Date())
-                            }
+                            disabled={(date) => {
+                                const startDate = form.getValues('start') || new Date();
+                                return date < startDate;
+                            }}
                             initialFocus
                             />
                         </PopoverContent>

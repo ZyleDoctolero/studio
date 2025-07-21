@@ -1,6 +1,7 @@
 
 'use client';
 
+import React from 'react';
 import { PageHeader } from '@/components/shared/page-header';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,9 +21,18 @@ import {
 import { MoreHorizontal, PlusCircle } from 'lucide-react';
 import Image from 'next/image';
 import { useData } from '@/hooks/use-data';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AddRoomForm } from '@/components/admin/add-room-form';
+import type { Room } from '@/lib/types';
 
 export default function AdminRoomsPage() {
-  const { rooms } = useData();
+  const { rooms, addRoom } = useData();
+  const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
+
+  const handleAddRoom = (newRoom: Omit<Room, 'id'>) => {
+    addRoom(newRoom);
+    setIsAddModalOpen(false);
+  };
   
   return (
     <div>
@@ -30,10 +40,20 @@ export default function AdminRoomsPage() {
         title="Room Management"
         description="Manage AV rooms and their associated equipment."
       >
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add Room
-        </Button>
+        <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+            <DialogTrigger asChild>
+                <Button>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Add Room
+                </Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Add New Room</DialogTitle>
+                </DialogHeader>
+                <AddRoomForm onSubmit={handleAddRoom} onCancel={() => setIsAddModalOpen(false)} />
+            </DialogContent>
+        </Dialog>
       </PageHeader>
       <div className="rounded-lg border">
         <Table>

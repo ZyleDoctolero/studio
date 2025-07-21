@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { Calendar as CalendarIcon, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import React from 'react';
+import { Label } from '@/components/ui/label';
 
 export default function AdminReportsPage() {
   const [date, setDate] = React.useState<Date | undefined>(new Date());
@@ -30,7 +31,7 @@ export default function AdminReportsPage() {
         <CardContent className="space-y-4">
           <div className="grid gap-4 md:grid-cols-3">
             <div className="flex flex-col space-y-1.5">
-              <label htmlFor="report-type" className="text-sm font-medium">Report Type</label>
+              <Label htmlFor="report-type">Report Type</Label>
               <Select>
                 <SelectTrigger id="report-type">
                   <SelectValue placeholder="Select a report type" />
@@ -43,7 +44,7 @@ export default function AdminReportsPage() {
               </Select>
             </div>
             <div className="flex flex-col space-y-1.5">
-              <label htmlFor="date-range" className="text-sm font-medium">Date Range</label>
+              <Label htmlFor="date-range">Date Range</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button

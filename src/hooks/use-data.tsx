@@ -12,6 +12,7 @@ interface DataContextType {
   reservations: Reservation[];
   users: User[];
   addEquipment: (newEquipment: Omit<Equipment, 'id' | 'status'>) => void;
+  addRoom: (newRoom: Omit<Room, 'id'>) => void;
   addReservation: (itemId: string, userId: string, start: Date, end: Date, itemType: 'equipment' | 'room') => void;
   approveReservation: (reservationId: string) => void;
   declineReservation: (reservationId: string) => void;
@@ -30,7 +31,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     setEquipment(prev => {
         const newEquipment: Equipment = {
             ...newEquipmentData,
-            id: `e${prev.length + 1}`,
+            id: crypto.randomUUID(),
             status: 'Available',
         };
         return [...prev, newEquipment]
@@ -40,11 +41,25 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         description: `Successfully added ${newEquipmentData.name}.`
     })
   }, [toast]);
+  
+  const addRoom = useCallback((newRoomData: Omit<Room, 'id'>) => {
+    setRooms(prev => {
+        const newRoom: Room = {
+            ...newRoomData,
+            id: crypto.randomUUID(),
+        };
+        return [...prev, newRoom]
+    });
+    toast({
+        title: "Success!",
+        description: `Successfully added ${newRoomData.name}.`
+    })
+  }, [toast]);
 
   const addReservation = useCallback((itemId: string, userId: string, start: Date, end: Date, itemType: 'equipment' | 'room') => {
     setReservations(prev => {
         const newReservation: Reservation = {
-            id: `res${prev.length + 1}`,
+            id: crypto.randomUUID(),
             itemId,
             userId,
             start,
@@ -86,6 +101,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     reservations,
     users,
     addEquipment,
+    addRoom,
     addReservation,
     approveReservation,
     declineReservation,
