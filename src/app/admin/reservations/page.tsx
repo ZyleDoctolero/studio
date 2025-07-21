@@ -46,44 +46,59 @@ export default function AdminReservationsPage() {
     }
   };
 
-  const renderReservationRows = (filterStatus: string) => {
+  const renderReservationsTable = (filterStatus: string) => {
     const filteredReservations = reservations
         .filter(r => r.status === filterStatus)
         .sort((a,b) => a.start.getTime() - b.start.getTime());
 
-    if (filteredReservations.length === 0) {
-        return (
-            <TableRow>
-                <TableCell colSpan={6} className="text-center h-24">
-                    No {filterStatus.toLowerCase()} reservations.
-                </TableCell>
-            </TableRow>
-        )
-    }
-
-    return filteredReservations.map(res => (
-        <TableRow key={res.id}>
-          <TableCell className="font-medium">{getItemName(res.itemId, res.itemType)}</TableCell>
-          <TableCell>{getUserName(res.userId)}</TableCell>
-          <TableCell>{format(res.start, 'MMM d, yyyy h:mm a')}</TableCell>
-          <TableCell>{format(res.end, 'MMM d, yyyy h:mm a')}</TableCell>
-          <TableCell>
-            <Badge variant={getStatusVariant(res.status)}>{res.status}</Badge>
-          </TableCell>
-          <TableCell>
-            {res.status === 'Pending' && (
-              <div className="flex gap-2">
-                <Button variant="ghost" size="icon" className='h-8 w-8 text-green-600 hover:text-green-600' onClick={() => approveReservation(res.id)}>
-                  <Check className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" className='h-8 w-8 text-red-600 hover:text-red-600' onClick={() => declineReservation(res.id)}>
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-          </TableCell>
-        </TableRow>
-      )
+    return (
+        <div className="mt-4 rounded-lg border">
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                    <TableHead>Item</TableHead>
+                    <TableHead>User</TableHead>
+                    <TableHead>Start Date</TableHead>
+                    <TableHead>End Date</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className='w-[100px]'>Actions</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {filteredReservations.length === 0 ? (
+                        <TableRow>
+                            <TableCell colSpan={6} className="text-center h-24">
+                                No {filterStatus.toLowerCase()} reservations.
+                            </TableCell>
+                        </TableRow>
+                    ) : (
+                        filteredReservations.map(res => (
+                            <TableRow key={res.id}>
+                              <TableCell className="font-medium">{getItemName(res.itemId, res.itemType)}</TableCell>
+                              <TableCell>{getUserName(res.userId)}</TableCell>
+                              <TableCell>{format(res.start, 'MMM d, yyyy h:mm a')}</TableCell>
+                              <TableCell>{format(res.end, 'MMM d, yyyy h:mm a')}</TableCell>
+                              <TableCell>
+                                <Badge variant={getStatusVariant(res.status)}>{res.status}</Badge>
+                              </TableCell>
+                              <TableCell>
+                                {res.status === 'Pending' && (
+                                  <div className="flex gap-2">
+                                    <Button variant="ghost" size="icon" className='h-8 w-8 text-green-600 hover:text-green-600' onClick={() => approveReservation(res.id)}>
+                                      <Check className="h-4 w-4" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className='h-8 w-8 text-red-600 hover:text-red-600' onClick={() => declineReservation(res.id)}>
+                                      <X className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          ))
+                    )}
+                </TableBody>
+            </Table>
+        </div>
     )
   }
 
@@ -101,37 +116,21 @@ export default function AdminReservationsPage() {
             <TabsTrigger value="declined">Declined</TabsTrigger>
             <TabsTrigger value="overdue">Overdue</TabsTrigger>
         </TabsList>
-        <div className="mt-4 rounded-lg border">
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                    <TableHead>Item</TableHead>
-                    <TableHead>User</TableHead>
-                    <TableHead>Start Date</TableHead>
-                    <TableHead>End Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className='w-[100px]'>Actions</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    <TabsContent value="pending" className='contents'>
-                        {renderReservationRows('Pending')}
-                    </TabsContent>
-                    <TabsContent value="active" className='contents'>
-                        {renderReservationRows('Active')}
-                    </TabsContent>
-                    <TabsContent value="completed" className='contents'>
-                        {renderReservationRows('Completed')}
-                    </TabsContent>
-                    <TabsContent value="declined" className='contents'>
-                        {renderReservationRows('Declined')}
-                    </TabsContent>
-                     <TabsContent value="overdue" className='contents'>
-                        {renderReservationRows('Overdue')}
-                    </TabsContent>
-                </TableBody>
-            </Table>
-        </div>
+        <TabsContent value="pending">
+            {renderReservationsTable('Pending')}
+        </TabsContent>
+        <TabsContent value="active">
+            {renderReservationsTable('Active')}
+        </TabsContent>
+        <TabsContent value="completed">
+            {renderReservationsTable('Completed')}
+        </TabsContent>
+        <TabsContent value="declined">
+            {renderReservationsTable('Declined')}
+        </TabsContent>
+        <TabsContent value="overdue">
+            {renderReservationsTable('Overdue')}
+        </TabsContent>
       </Tabs>
     </div>
   );
