@@ -12,8 +12,10 @@ interface DataContextType {
   reservations: Reservation[];
   users: User[];
   addEquipment: (newEquipment: Omit<Equipment, 'id' | 'status'>) => void;
+  updateEquipment: (equipmentId: string, updatedData: Partial<Omit<Equipment, 'id'>>) => void;
   deleteEquipment: (equipmentId: string) => void;
   addRoom: (newRoom: Omit<Room, 'id'>) => void;
+  updateRoom: (roomId: string, updatedData: Partial<Omit<Room, 'id'>>) => void;
   deleteRoom: (roomId: string) => void;
   addUser: (newUser: Omit<User, 'id' | 'penaltyPoints'>) => void;
   deleteUser: (userId: string) => void;
@@ -45,6 +47,18 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         description: `Successfully added ${newEquipmentData.name}.`
     })
   }, [toast]);
+
+  const updateEquipment = useCallback((equipmentId: string, updatedData: Partial<Omit<Equipment, 'id'>>) => {
+    setEquipment(prev =>
+      prev.map(item =>
+        item.id === equipmentId ? { ...item, ...updatedData } : item
+      )
+    );
+    toast({
+        title: "Success!",
+        description: `Successfully updated ${updatedData.name}.`
+    })
+  }, [toast]);
   
   const deleteEquipment = useCallback((equipmentId: string) => {
     const equipmentToDelete = equipment.find(e => e.id === equipmentId);
@@ -67,6 +81,18 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     toast({
         title: "Success!",
         description: `Successfully added ${newRoomData.name}.`
+    })
+  }, [toast]);
+
+  const updateRoom = useCallback((roomId: string, updatedData: Partial<Omit<Room, 'id'>>) => {
+    setRooms(prev =>
+      prev.map(item =>
+        item.id === roomId ? { ...item, ...updatedData } : item
+      )
+    );
+    toast({
+        title: "Success!",
+        description: `Successfully updated ${updatedData.name}.`
     })
   }, [toast]);
 
@@ -150,8 +176,10 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     reservations,
     users,
     addEquipment,
+    updateEquipment,
     deleteEquipment,
     addRoom,
+    updateRoom,
     deleteRoom,
     addUser,
     deleteUser,

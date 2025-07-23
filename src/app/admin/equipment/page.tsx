@@ -23,19 +23,32 @@ import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import { useData } from '@/hooks/use-data';
 import { AddEquipmentForm } from '@/components/admin/add-equipment-form';
+import { EditEquipmentForm } from '@/components/admin/edit-equipment-form';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import type { Equipment } from '@/lib/types';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 export default function AdminEquipmentPage() {
-  const { equipment, addEquipment, deleteEquipment } = useData();
+  const { equipment, addEquipment, updateEquipment, deleteEquipment } = useData();
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = React.useState(false);
   const [selectedEquipment, setSelectedEquipment] = React.useState<Equipment | null>(null);
 
   const handleAddEquipment = (newEquipment: Omit<Equipment, 'id' | 'status'>) => {
     addEquipment(newEquipment);
     setIsAddModalOpen(false);
+  };
+
+  const handleUpdateEquipment = (updatedEquipment: Equipment) => {
+    updateEquipment(updatedEquipment.id, updatedEquipment);
+    setIsEditModalOpen(false);
+    setSelectedEquipment(null);
+  };
+
+  const openEditModal = (equipment: Equipment) => {
+    setSelectedEquipment(equipment);
+    setIsEditModalOpen(true);
   };
 
   const openDeleteAlert = (equipment: Equipment) => {
@@ -118,7 +131,7 @@ export default function AdminEquipmentPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => openEditModal(item)}>Edit</DropdownMenuItem>
                       <DropdownMenuItem>Set Maintenance</DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-destructive"
@@ -134,6 +147,25 @@ export default function AdminEquipmentPage() {
           </TableBody>
         </Table>
       </div>
+
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Edit Equipment</DialogTitle>
+            </DialogHeader>
+            {selectedEquipment && (
+                <EditEquipmentForm
+                    equipment={selectedEquipment}
+                    onSubmit={handleUpdateEquipment}
+                    onCancel={() => {
+                        setIsEditModalOpen(false);
+                        setSelectedEquipment(null);
+                    }}
+                />
+            )}
+        </DialogContent>
+      </Dialog>
+      
       <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

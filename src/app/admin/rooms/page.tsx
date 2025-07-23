@@ -23,12 +23,14 @@ import Image from 'next/image';
 import { useData } from '@/hooks/use-data';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AddRoomForm } from '@/components/admin/add-room-form';
+import { EditRoomForm } from '@/components/admin/edit-room-form';
 import type { Room } from '@/lib/types';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 export default function AdminRoomsPage() {
-  const { rooms, addRoom, deleteRoom } = useData();
+  const { rooms, addRoom, updateRoom, deleteRoom } = useData();
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = React.useState(false);
   const [selectedRoom, setSelectedRoom] = React.useState<Room | null>(null);
 
@@ -37,6 +39,17 @@ export default function AdminRoomsPage() {
     setIsAddModalOpen(false);
   };
   
+  const handleUpdateRoom = (updatedRoom: Room) => {
+    updateRoom(updatedRoom.id, updatedRoom);
+    setIsEditModalOpen(false);
+    setSelectedRoom(null);
+  };
+
+  const openEditModal = (room: Room) => {
+    setSelectedRoom(room);
+    setIsEditModalOpen(true);
+  };
+
   const openDeleteAlert = (room: Room) => {
     setSelectedRoom(room);
     setIsDeleteAlertOpen(true);
@@ -107,7 +120,7 @@ export default function AdminRoomsPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => openEditModal(room)}>Edit</DropdownMenuItem>
                       <DropdownMenuItem>Override Schedule</DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-destructive"
@@ -123,6 +136,25 @@ export default function AdminRoomsPage() {
           </TableBody>
         </Table>
       </div>
+
+       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Edit Room</DialogTitle>
+            </DialogHeader>
+            {selectedRoom && (
+                <EditRoomForm
+                    room={selectedRoom}
+                    onSubmit={handleUpdateRoom}
+                    onCancel={() => {
+                        setIsEditModalOpen(false);
+                        setSelectedRoom(null);
+                    }}
+                />
+            )}
+        </DialogContent>
+      </Dialog>
+
        <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
