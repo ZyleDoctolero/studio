@@ -1,5 +1,7 @@
+
 'use client';
 
+import React from 'react';
 import { PageHeader } from '@/components/shared/page-header';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,21 +19,59 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, PlusCircle } from 'lucide-react';
-import { users as allUsers } from '@/lib/data';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useData } from '@/hooks/use-data';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import type { User } from '@/lib/types';
+import { AddUserForm } from '@/components/admin/add-user-form';
 
 export default function AdminUsersPage() {
+  const { users, addUser, deleteUser } = useData();
+  const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = React.useState(false);
+  const [selectedUser, setSelectedUser] = React.useState<User | null>(null);
+
+  const handleAddUser = (newUser: Omit<User, 'id' | 'penaltyPoints'>) => {
+    addUser(newUser);
+    setIsAddModalOpen(false);
+  };
+
+  const openDeleteAlert = (user: User) => {
+    setSelectedUser(user);
+    setIsDeleteAlertOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (selectedUser) {
+      deleteUser(selectedUser.id);
+      setIsDeleteAlertOpen(false);
+      setSelectedUser(null);
+    }
+  };
+
+
   return (
     <div>
       <PageHeader
         title="User Management"
         description="View and manage all user accounts in the system."
       >
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add User
-        </Button>
+        <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+            <DialogTrigger asChild>
+                <Button>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add User
+                </Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Add New User</DialogTitle>
+                </DialogHeader>
+                <AddUserForm onSubmit={handleAddUser} onCancel={() => setIsAddModalOpen(false)} />
+            </DialogContent>
+        </Dialog>
       </PageHeader>
       <div className="rounded-lg border">
         <Table>
@@ -46,7 +86,7 @@ export default function AdminUsersPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {allUsers.map((user) => (
+            {users.map((user) => (
               <TableRow key={user.id}>
                 <TableCell>
                     <Avatar className="h-9 w-9">
@@ -82,7 +122,10 @@ export default function AdminUsersPage() {
                       <DropdownMenuItem>Edit User</DropdownMenuItem>
                       <DropdownMenuItem>View Activity</DropdownMenuItem>
                       <DropdownMenuItem>Adjust Penalties</DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">
+                      <DropdownMenuItem 
+                        className="text-destructive"
+                        onSelect={() => openDeleteAlert(user)}
+                      >
                         Delete User
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -93,6 +136,22 @@ export default function AdminUsersPage() {
           </TableBody>
         </Table>
       </div>
+
+      <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the user "{selectedUser?.name}" and all associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setSelectedUser(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
     </div>
   );
 }

@@ -15,6 +15,8 @@ interface DataContextType {
   deleteEquipment: (equipmentId: string) => void;
   addRoom: (newRoom: Omit<Room, 'id'>) => void;
   deleteRoom: (roomId: string) => void;
+  addUser: (newUser: Omit<User, 'id' | 'penaltyPoints'>) => void;
+  deleteUser: (userId: string) => void;
   addReservation: (itemId: string, userId: string, start: Date, end: Date, itemType: 'equipment' | 'room') => void;
   approveReservation: (reservationId: string) => void;
   declineReservation: (reservationId: string) => void;
@@ -78,6 +80,31 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     });
   }, [toast, rooms]);
 
+  const addUser = useCallback((newUserData: Omit<User, 'id' | 'penaltyPoints'>) => {
+    setUsers(prev => {
+      const newUser: User = {
+        ...newUserData,
+        id: crypto.randomUUID(),
+        penaltyPoints: 0,
+      };
+      return [...prev, newUser]
+    });
+    toast({
+        title: "Success!",
+        description: `Successfully added user ${newUserData.name}.`
+    })
+  }, [toast]);
+
+  const deleteUser = useCallback((userId: string) => {
+    const userToDelete = users.find(u => u.id === userId);
+    setUsers(prev => prev.filter(u => u.id !== userId));
+     toast({
+        title: "User Deleted",
+        description: `Successfully deleted ${userToDelete?.name}.`,
+        variant: 'destructive'
+    });
+  }, [toast, users]);
+
   const addReservation = useCallback((itemId: string, userId: string, start: Date, end: Date, itemType: 'equipment' | 'room') => {
     setReservations(prev => {
         const newReservation: Reservation = {
@@ -126,6 +153,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     deleteEquipment,
     addRoom,
     deleteRoom,
+    addUser,
+    deleteUser,
     addReservation,
     approveReservation,
     declineReservation,

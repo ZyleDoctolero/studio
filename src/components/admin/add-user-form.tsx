@@ -1,0 +1,124 @@
+
+'use client';
+
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import type { User, Role } from '@/lib/types';
+import { Loader2 } from 'lucide-react';
+import React from 'react';
+
+const userSchema = z.object({
+  name: z.string().min(3, 'Name must be at least 3 characters long.'),
+  username: z.string().min(3, 'Username must be at least 3 characters long.'),
+  password: z.string().min(6, 'Password must be at least 6 characters long.'),
+  role: z.enum(['student', 'faculty', 'admin']),
+});
+
+type UserFormValues = z.infer<typeof userSchema>;
+
+interface AddUserFormProps {
+  onSubmit: (data: Omit<User, 'id' | 'penaltyPoints'>) => void;
+  onCancel: () => void;
+}
+
+export function AddUserForm({ onSubmit, onCancel }: AddUserFormProps) {
+  const [isLoading, setIsLoading] = React.useState(false);
+  
+  const form = useForm<UserFormValues>({
+    resolver: zodResolver(userSchema),
+    defaultValues: {
+      name: '',
+      username: '',
+      password: '',
+      role: 'student',
+    },
+  });
+
+  const handleSubmit = (values: UserFormValues) => {
+    setIsLoading(true);
+    onSubmit(values);
+    setIsLoading(false);
+  };
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Full Name</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., John Doe" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="username"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Username</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., jdoe" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input type="password" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="role"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Role</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a role" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {(['student', 'faculty', 'admin'] as Role[]).map(cat => (
+                    <SelectItem key={cat} value={cat} className="capitalize">{cat}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <div className="flex justify-end space-x-2 pt-4">
+            <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
+                Cancel
+            </Button>
+            <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Add User
+            </Button>
+        </div>
+      </form>
+    </Form>
+  );
+}
