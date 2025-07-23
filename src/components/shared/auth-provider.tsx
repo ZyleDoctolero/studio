@@ -2,8 +2,8 @@
 
 import React, { createContext, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import type { User, Role } from '@/lib/types';
-import { users } from '@/lib/data';
+import type { User } from '@/lib/types';
+import { useData } from '@/hooks/use-data';
 
 interface AuthContextType {
   user: User | null;
@@ -18,6 +18,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  // We can't use the useData hook directly here as AuthProvider wraps DataProvider.
+  // Instead, we'll read from localStorage directly for initialization,
+  // and the login function will receive the up-to-date user list.
 
   useEffect(() => {
     try {
@@ -34,10 +37,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = useCallback(async (username: string, pass: string): Promise<User | null> => {
-    const foundUser = users.find(u => u.username === username && u.password === pass);
+    // This is the fix: read the current user list from localStorage.
+    const storedUsers = localStorage.getItem('uic_users');
+    const allUsers: User[] = storedUsers ? JSON.parse(storedUsers) : [];
+    
+    const foundUser = allUsers.find(u => u.username === username && u.password === pass);
+    
     if (foundUser) {
       const userToStore = { ...foundUser };
-      delete userToStore.password;
+      delete userToStore.password; // Never store the password in the session user object
       setUser(userToStore);
       localStorage.setItem('uic-user', JSON.stringify(userToStore));
       return userToStore;

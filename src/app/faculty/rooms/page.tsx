@@ -10,11 +10,13 @@ import { Users, MonitorSpeaker } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useData } from '@/hooks/use-data';
 import { ReserveItemDialog } from '@/components/reservations/reserve-item-dialog';
+import { RoomCalendarDialog } from '@/components/reservations/room-calendar-dialog';
 import type { Room } from '@/lib/types';
 
 export default function RoomBookingPage() {
     const { rooms, reservations, addReservation } = useData();
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isReserveModalOpen, setIsReserveModalOpen] = useState(false);
+    const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
     const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
 
     const isRoomAvailable = (roomId: string) => {
@@ -22,16 +24,24 @@ export default function RoomBookingPage() {
         const activeReservations = reservations.filter(r => 
             r.itemId === roomId && 
             r.itemType === 'room' &&
-            r.status === 'Active' &&
-            now >= r.start && now < r.end
+            (r.status === 'Active' || r.status === 'Pending') &&
+            now < r.end
         );
-        return activeReservations.length === 0;
+        // This is a simplified check. It doesn't check for future bookings.
+        // A full implementation would check if *any* active or pending booking conflicts with *now*.
+        const currentlyBooked = reservations.some(r => r.itemId === roomId && r.itemType === 'room' && (r.status === 'Active') && now >= r.start && now < r.end)
+        return !currentlyBooked;
     };
     
     const handleBookClick = (room: Room) => {
       setSelectedRoom(room);
-      setIsModalOpen(true);
+      setIsReserveModalOpen(true);
     };
+
+    const handleCalendarClick = (room: Room) => {
+        setSelectedRoom(room);
+        setIsCalendarModalOpen(true);
+    }
 
   return (
     <div className="container mx-auto">
@@ -79,7 +89,7 @@ export default function RoomBookingPage() {
                 <Button disabled={!available} onClick={() => handleBookClick(room)}>
                   {available ? 'Book Now' : 'Currently Booked'}
                 </Button>
-                <Button variant="outline">View Calendar</Button>
+                <Button variant="outline" onClick={() => handleCalendarClick(room)}>View Calendar</Button>
               </CardFooter>
             </Card>
           )
@@ -89,9 +99,16 @@ export default function RoomBookingPage() {
         <ReserveItemDialog
             item={selectedRoom}
             itemType='room'
-            isOpen={isModalOpen}
-            onOpenChange={setIsModalOpen}
+            isOpen={isReserveModalOpen}
+            onOpenChange={setIsReserveModalOpen}
             onConfirm={addReservation}
+        />
+      )}
+       {selectedRoom && (
+        <RoomCalendarDialog
+            room={selectedRoom}
+            isOpen={isCalendarModalOpen}
+            onOpenChange={setIsCalendarModalOpen}
         />
       )}
     </div>
