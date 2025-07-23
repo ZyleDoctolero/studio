@@ -121,7 +121,7 @@ export default function AdminEquipmentPage() {
                 <TableCell>
                   <Badge
                     variant={
-                      item.status === 'Available' ? 'default' : item.status === 'Unavailable' ? 'destructive' : item.status === 'Maintenance' ? 'secondary' : 'outline'
+                      item.status === 'Available' ? 'default' : item.status === 'Maintenance' ? 'secondary' : 'destructive'
                     }
                   >
                     {item.status}

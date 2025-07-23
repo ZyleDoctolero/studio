@@ -71,8 +71,8 @@ export function UserActivityDialog({ user, isOpen, onOpenChange }: UserActivityD
                   <TableRow key={res.id}>
                     <TableCell>{getItemName(res)}</TableCell>
                     <TableCell className='capitalize'>{res.itemType}</TableCell>
-                    <TableCell>{format(res.start, 'MMM d, yyyy')}</TableCell>
-                    <TableCell>{format(res.end, 'MMM d, yyyy')}</TableCell>
+                    <TableCell>{format(res.start, 'MMM d, yyyy h:mm a')}</TableCell>
+                    <TableCell>{format(res.end, 'MMM d, yyyy h:mm a')}</TableCell>
                     <TableCell>
                       <Badge variant={getStatusVariant(res.status)}>
                         {res.status}

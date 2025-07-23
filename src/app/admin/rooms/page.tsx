@@ -121,7 +121,6 @@ export default function AdminRoomsPage() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onSelect={() => openEditModal(room)}>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>Override Schedule</DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-destructive"
                         onSelect={() => openDeleteAlert(room)}

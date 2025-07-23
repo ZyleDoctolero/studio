@@ -16,7 +16,6 @@ const equipmentSchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters long.'),
   category: z.enum(['Projector', 'Camera', 'Microphone', 'Other']),
   totalQuantity: z.coerce.number().int().min(1, 'Quantity must be at least 1.'),
-  status: z.enum(['Available', 'Partially Available', 'Unavailable', 'Maintenance']),
   imageUrl: z.string().url('Please enter a valid URL.').optional().or(z.literal('')),
   aiHint: z.string().min(2, 'AI hint must be at least 2 characters long.'),
 });
@@ -38,7 +37,6 @@ export function EditEquipmentForm({ equipment, onSubmit, onCancel }: EditEquipme
       name: equipment.name,
       category: equipment.category,
       totalQuantity: equipment.totalQuantity,
-      status: equipment.status,
       imageUrl: equipment.imageUrl,
       aiHint: equipment.aiHint,
     },
@@ -101,28 +99,6 @@ export function EditEquipmentForm({ equipment, onSubmit, onCancel }: EditEquipme
               <FormControl>
                 <Input type="number" {...field} />
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="status"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Status</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a status" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {(['Available', 'Partially Available', 'Unavailable', 'Maintenance'] as Equipment['status'][]).map(stat => (
-                    <SelectItem key={stat} value={stat}>{stat}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
               <FormMessage />
             </FormItem>
           )}

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { PageHeader } from '@/components/shared/page-header';
@@ -71,7 +72,6 @@ export default function AdminReportsPage() {
             </div>
           </div>
           <div className="flex justify-end space-x-2 pt-4">
-            <Button variant="outline">Preview</Button>
             <Button>
               <Download className="mr-2 h-4 w-4" />
               Export as PDF
