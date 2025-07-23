@@ -24,16 +24,32 @@ import { useData } from '@/hooks/use-data';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AddRoomForm } from '@/components/admin/add-room-form';
 import type { Room } from '@/lib/types';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 export default function AdminRoomsPage() {
-  const { rooms, addRoom } = useData();
+  const { rooms, addRoom, deleteRoom } = useData();
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = React.useState(false);
+  const [selectedRoom, setSelectedRoom] = React.useState<Room | null>(null);
 
   const handleAddRoom = (newRoom: Omit<Room, 'id'>) => {
     addRoom(newRoom);
     setIsAddModalOpen(false);
   };
   
+  const openDeleteAlert = (room: Room) => {
+    setSelectedRoom(room);
+    setIsDeleteAlertOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (selectedRoom) {
+      deleteRoom(selectedRoom.id);
+      setIsDeleteAlertOpen(false);
+      setSelectedRoom(null);
+    }
+  };
+
   return (
     <div>
       <PageHeader
@@ -93,7 +109,10 @@ export default function AdminRoomsPage() {
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem>Edit</DropdownMenuItem>
                       <DropdownMenuItem>Override Schedule</DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">
+                      <DropdownMenuItem
+                        className="text-destructive"
+                        onSelect={() => openDeleteAlert(room)}
+                      >
                         Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -104,6 +123,20 @@ export default function AdminRoomsPage() {
           </TableBody>
         </Table>
       </div>
+       <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the room "{selectedRoom?.name}" and all associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setSelectedRoom(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

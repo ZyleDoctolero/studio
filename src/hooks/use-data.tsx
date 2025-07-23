@@ -12,7 +12,9 @@ interface DataContextType {
   reservations: Reservation[];
   users: User[];
   addEquipment: (newEquipment: Omit<Equipment, 'id' | 'status'>) => void;
+  deleteEquipment: (equipmentId: string) => void;
   addRoom: (newRoom: Omit<Room, 'id'>) => void;
+  deleteRoom: (roomId: string) => void;
   addReservation: (itemId: string, userId: string, start: Date, end: Date, itemType: 'equipment' | 'room') => void;
   approveReservation: (reservationId: string) => void;
   declineReservation: (reservationId: string) => void;
@@ -42,6 +44,16 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     })
   }, [toast]);
   
+  const deleteEquipment = useCallback((equipmentId: string) => {
+    const equipmentToDelete = equipment.find(e => e.id === equipmentId);
+    setEquipment(prev => prev.filter(e => e.id !== equipmentId));
+    toast({
+        title: "Equipment Deleted",
+        description: `Successfully deleted ${equipmentToDelete?.name}.`,
+        variant: 'destructive'
+    });
+  }, [toast, equipment]);
+  
   const addRoom = useCallback((newRoomData: Omit<Room, 'id'>) => {
     setRooms(prev => {
         const newRoom: Room = {
@@ -55,6 +67,16 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         description: `Successfully added ${newRoomData.name}.`
     })
   }, [toast]);
+
+  const deleteRoom = useCallback((roomId: string) => {
+    const roomToDelete = rooms.find(r => r.id === roomId);
+    setRooms(prev => prev.filter(r => r.id !== roomId));
+    toast({
+        title: "Room Deleted",
+        description: `Successfully deleted ${roomToDelete?.name}.`,
+        variant: 'destructive'
+    });
+  }, [toast, rooms]);
 
   const addReservation = useCallback((itemId: string, userId: string, start: Date, end: Date, itemType: 'equipment' | 'room') => {
     setReservations(prev => {
@@ -101,7 +123,9 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     reservations,
     users,
     addEquipment,
+    deleteEquipment,
     addRoom,
+    deleteRoom,
     addReservation,
     approveReservation,
     declineReservation,

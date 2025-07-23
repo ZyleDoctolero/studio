@@ -25,14 +25,30 @@ import { useData } from '@/hooks/use-data';
 import { AddEquipmentForm } from '@/components/admin/add-equipment-form';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import type { Equipment } from '@/lib/types';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 export default function AdminEquipmentPage() {
-  const { equipment, addEquipment } = useData();
+  const { equipment, addEquipment, deleteEquipment } = useData();
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = React.useState(false);
+  const [selectedEquipment, setSelectedEquipment] = React.useState<Equipment | null>(null);
 
   const handleAddEquipment = (newEquipment: Omit<Equipment, 'id' | 'status'>) => {
     addEquipment(newEquipment);
     setIsAddModalOpen(false);
+  };
+
+  const openDeleteAlert = (equipment: Equipment) => {
+    setSelectedEquipment(equipment);
+    setIsDeleteAlertOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (selectedEquipment) {
+      deleteEquipment(selectedEquipment.id);
+      setIsDeleteAlertOpen(false);
+      setSelectedEquipment(null);
+    }
   };
 
   return (
@@ -104,7 +120,10 @@ export default function AdminEquipmentPage() {
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem>Edit</DropdownMenuItem>
                       <DropdownMenuItem>Set Maintenance</DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">
+                      <DropdownMenuItem
+                        className="text-destructive"
+                        onSelect={() => openDeleteAlert(item)}
+                      >
                         Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -115,6 +134,20 @@ export default function AdminEquipmentPage() {
           </TableBody>
         </Table>
       </div>
+      <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the equipment "{selectedEquipment?.name}" and all associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setSelectedEquipment(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
