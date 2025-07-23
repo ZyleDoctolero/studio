@@ -18,6 +18,7 @@ interface DataContextType {
   updateRoom: (roomId: string, updatedData: Partial<Omit<Room, 'id'>>) => void;
   deleteRoom: (roomId: string) => void;
   addUser: (newUser: Omit<User, 'id' | 'penaltyPoints'>) => void;
+  updateUser: (userId: string, updatedData: Partial<Omit<User, 'id'>>) => void;
   deleteUser: (userId: string) => void;
   addReservation: (itemId: string, userId: string, start: Date, end: Date, itemType: 'equipment' | 'room') => void;
   approveReservation: (reservationId: string) => void;
@@ -54,11 +55,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         item.id === equipmentId ? { ...item, ...updatedData } : item
       )
     );
+    const updatedName = updatedData.name || equipment.find(e => e.id === equipmentId)?.name;
     toast({
         title: "Success!",
-        description: `Successfully updated ${updatedData.name}.`
+        description: `Successfully updated ${updatedName}.`
     })
-  }, [toast]);
+  }, [toast, equipment]);
   
   const deleteEquipment = useCallback((equipmentId: string) => {
     const equipmentToDelete = equipment.find(e => e.id === equipmentId);
@@ -120,6 +122,20 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         description: `Successfully added user ${newUserData.name}.`
     })
   }, [toast]);
+  
+  const updateUser = useCallback((userId: string, updatedData: Partial<Omit<User, 'id'>>) => {
+    setUsers(prev =>
+      prev.map(item =>
+        item.id === userId ? { ...item, ...updatedData } : item
+      )
+    );
+    const updatedUser = users.find(u => u.id === userId);
+    toast({
+        title: "Success!",
+        description: `Successfully updated ${updatedUser?.name}.`
+    })
+  }, [toast, users]);
+
 
   const deleteUser = useCallback((userId: string) => {
     const userToDelete = users.find(u => u.id === userId);
@@ -182,6 +198,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     updateRoom,
     deleteRoom,
     addUser,
+    updateUser,
     deleteUser,
     addReservation,
     approveReservation,

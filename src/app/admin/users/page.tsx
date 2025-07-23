@@ -26,16 +26,42 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import type { User } from '@/lib/types';
 import { AddUserForm } from '@/components/admin/add-user-form';
+import { EditUserForm } from '@/components/admin/edit-user-form';
+import { AdjustPenaltyForm } from '@/components/admin/adjust-penalty-form';
 
 export default function AdminUsersPage() {
-  const { users, addUser, deleteUser } = useData();
+  const { users, addUser, updateUser, deleteUser } = useData();
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
+  const [isPenaltyModalOpen, setIsPenaltyModalOpen] = React.useState(false);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = React.useState(false);
   const [selectedUser, setSelectedUser] = React.useState<User | null>(null);
 
   const handleAddUser = (newUser: Omit<User, 'id' | 'penaltyPoints'>) => {
     addUser(newUser);
     setIsAddModalOpen(false);
+  };
+
+  const handleUpdateUser = (updatedUser: User) => {
+    updateUser(updatedUser.id, updatedUser);
+    setIsEditModalOpen(false);
+    setSelectedUser(null);
+  };
+  
+  const handlePenaltyUpdate = (userId: string, penaltyPoints: number) => {
+    updateUser(userId, { penaltyPoints });
+    setIsPenaltyModalOpen(false);
+    setSelectedUser(null);
+  }
+
+  const openEditModal = (user: User) => {
+    setSelectedUser(user);
+    setIsEditModalOpen(true);
+  };
+
+  const openPenaltyModal = (user: User) => {
+    setSelectedUser(user);
+    setIsPenaltyModalOpen(true);
   };
 
   const openDeleteAlert = (user: User) => {
@@ -119,9 +145,9 @@ export default function AdminUsersPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Edit User</DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => openEditModal(user)}>Edit User</DropdownMenuItem>
                       <DropdownMenuItem>View Activity</DropdownMenuItem>
-                      <DropdownMenuItem>Adjust Penalties</DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => openPenaltyModal(user)}>Adjust Penalties</DropdownMenuItem>
                       <DropdownMenuItem 
                         className="text-destructive"
                         onSelect={() => openDeleteAlert(user)}
@@ -136,6 +162,42 @@ export default function AdminUsersPage() {
           </TableBody>
         </Table>
       </div>
+
+       <Dialog open={isEditModalOpen} onOpenChange={(isOpen) => { setIsEditModalOpen(isOpen); if (!isOpen) setSelectedUser(null);}}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Edit User</DialogTitle>
+            </DialogHeader>
+            {selectedUser && (
+                <EditUserForm
+                    user={selectedUser}
+                    onSubmit={handleUpdateUser}
+                    onCancel={() => {
+                        setIsEditModalOpen(false);
+                        setSelectedUser(null);
+                    }}
+                />
+            )}
+        </DialogContent>
+      </Dialog>
+      
+       <Dialog open={isPenaltyModalOpen} onOpenChange={(isOpen) => { setIsPenaltyModalOpen(isOpen); if (!isOpen) setSelectedUser(null);}}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Adjust Penalties for {selectedUser?.name}</DialogTitle>
+            </DialogHeader>
+            {selectedUser && (
+                <AdjustPenaltyForm
+                    user={selectedUser}
+                    onSubmit={handlePenaltyUpdate}
+                    onCancel={() => {
+                        setIsPenaltyModalOpen(false);
+                        setSelectedUser(null);
+                    }}
+                />
+            )}
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
         <AlertDialogContent>
