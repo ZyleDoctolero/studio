@@ -1,10 +1,44 @@
 
 'use client';
 
-import React, { createContext, useState, useContext, useCallback } from 'react';
+import React, { createContext, useState, useContext, useCallback, useEffect } from 'react';
 import { equipment as initialEquipment, rooms as initialRooms, reservations as initialReservations, users as initialUsers } from '@/lib/data';
 import type { Equipment, Room, Reservation, User } from '@/lib/types';
 import { useToast } from './use-toast';
+
+// Helper to get data from localStorage
+const getFromStorage = <T,>(key: string, fallback: T): T => {
+    if (typeof window === 'undefined') {
+        return fallback;
+    }
+    try {
+        const item = window.localStorage.getItem(key);
+        if (item) {
+            // Special handling for dates
+            return JSON.parse(item, (key, value) => {
+                if (key === 'start' || key === 'end') {
+                    return new Date(value);
+                }
+                return value;
+            });
+        }
+    } catch (error) {
+        console.error(`Error reading from localStorage key “${key}”:`, error);
+    }
+    return fallback;
+};
+
+// Helper to set data to localStorage
+const setToStorage = <T,>(key: string, value: T) => {
+    if (typeof window === 'undefined') {
+        return;
+    }
+    try {
+        window.localStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+        console.error(`Error writing to localStorage key “${key}”:`, error);
+    }
+};
 
 interface DataContextType {
   equipment: Equipment[];
@@ -28,11 +62,18 @@ interface DataContextType {
 export const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
-  const [equipment, setEquipment] = useState<Equipment[]>(initialEquipment);
-  const [rooms, setRooms] = useState<Room[]>(initialRooms);
-  const [reservations, setReservations] = useState<Reservation[]>(initialReservations);
-  const [users, setUsers] = useState<User[]>(initialUsers);
-  const { toast } = useToast();
+    const [users, setUsers] = useState<User[]>(() => getFromStorage('uic_users', initialUsers));
+    const [equipment, setEquipment] = useState<Equipment[]>(() => getFromStorage('uic_equipment', initialEquipment));
+    const [rooms, setRooms] = useState<Room[]>(() => getFromStorage('uic_rooms', initialRooms));
+    const [reservations, setReservations] = useState<Reservation[]>(() => getFromStorage('uic_reservations', initialReservations));
+    const { toast } = useToast();
+    
+    // Persist to localStorage on change
+    useEffect(() => { setToStorage('uic_users', users); }, [users]);
+    useEffect(() => { setToStorage('uic_equipment', equipment); }, [equipment]);
+    useEffect(() => { setToStorage('uic_rooms', rooms); }, [rooms]);
+    useEffect(() => { setToStorage('uic_reservations', reservations); }, [reservations]);
+
 
   const addEquipment = useCallback((newEquipmentData: Omit<Equipment, 'id' | 'status'>) => {
     setEquipment(prev => {
@@ -50,17 +91,22 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   }, [toast]);
 
   const updateEquipment = useCallback((equipmentId: string, updatedData: Partial<Omit<Equipment, 'id'>>) => {
+    let updatedName = '';
     setEquipment(prev =>
-      prev.map(item =>
-        item.id === equipmentId ? { ...item, ...updatedData } : item
-      )
+      prev.map(item => {
+        if (item.id === equipmentId) {
+            updatedName = updatedData.name || item.name;
+            return { ...item, ...updatedData };
+        }
+        return item;
+      })
     );
-    const updatedName = updatedData.name || equipment.find(e => e.id === equipmentId)?.name;
+    
     toast({
         title: "Success!",
         description: `Successfully updated ${updatedName}.`
     })
-  }, [toast, equipment]);
+  }, [toast]);
   
   const deleteEquipment = useCallback((equipmentId: string) => {
     const equipmentToDelete = equipment.find(e => e.id === equipmentId);
@@ -87,14 +133,19 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   }, [toast]);
 
   const updateRoom = useCallback((roomId: string, updatedData: Partial<Omit<Room, 'id'>>) => {
+    let roomName = '';
     setRooms(prev =>
-      prev.map(item =>
-        item.id === roomId ? { ...item, ...updatedData } : item
-      )
+      prev.map(item => {
+        if (item.id === roomId) {
+            roomName = updatedData.name || item.name;
+            return { ...item, ...updatedData };
+        }
+        return item;
+      })
     );
     toast({
         title: "Success!",
-        description: `Successfully updated ${updatedData.name}.`
+        description: `Successfully updated ${roomName}.`
     })
   }, [toast]);
 
@@ -124,17 +175,21 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   }, [toast]);
   
   const updateUser = useCallback((userId: string, updatedData: Partial<Omit<User, 'id'>>) => {
+    let userName = '';
     setUsers(prev =>
-      prev.map(item =>
-        item.id === userId ? { ...item, ...updatedData } : item
-      )
+      prev.map(item => {
+        if (item.id === userId) {
+            userName = updatedData.name || item.name;
+            return { ...item, ...updatedData };
+        }
+        return item;
+      })
     );
-    const updatedUser = users.find(u => u.id === userId);
     toast({
         title: "Success!",
-        description: `Successfully updated ${updatedUser?.name}.`
+        description: `Successfully updated ${userName}.`
     })
-  }, [toast, users]);
+  }, [toast]);
 
 
   const deleteUser = useCallback((userId: string) => {

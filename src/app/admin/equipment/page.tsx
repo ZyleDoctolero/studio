@@ -46,6 +46,11 @@ export default function AdminEquipmentPage() {
     setSelectedEquipment(null);
   };
 
+  const handleSetMaintenance = (equipmentItem: Equipment) => {
+    const newStatus = equipmentItem.status === 'Maintenance' ? 'Available' : 'Maintenance';
+    updateEquipment(equipmentItem.id, { status: newStatus });
+  };
+
   const openEditModal = (equipment: Equipment) => {
     setSelectedEquipment(equipment);
     setIsEditModalOpen(true);
@@ -116,7 +121,7 @@ export default function AdminEquipmentPage() {
                 <TableCell>
                   <Badge
                     variant={
-                      item.status === 'Available' ? 'default' : item.status === 'Unavailable' ? 'destructive' : 'secondary'
+                      item.status === 'Available' ? 'default' : item.status === 'Unavailable' ? 'destructive' : item.status === 'Maintenance' ? 'secondary' : 'outline'
                     }
                   >
                     {item.status}
@@ -132,7 +137,9 @@ export default function AdminEquipmentPage() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onSelect={() => openEditModal(item)}>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>Set Maintenance</DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => handleSetMaintenance(item)}>
+                        {item.status === 'Maintenance' ? 'Set as Available' : 'Set Maintenance'}
+                      </DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-destructive"
                         onSelect={() => openDeleteAlert(item)}

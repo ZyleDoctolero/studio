@@ -28,6 +28,7 @@ import type { User } from '@/lib/types';
 import { AddUserForm } from '@/components/admin/add-user-form';
 import { EditUserForm } from '@/components/admin/edit-user-form';
 import { AdjustPenaltyForm } from '@/components/admin/adjust-penalty-form';
+import { UserActivityDialog } from '@/components/admin/user-activity-dialog';
 
 export default function AdminUsersPage() {
   const { users, addUser, updateUser, deleteUser } = useData();
@@ -35,6 +36,7 @@ export default function AdminUsersPage() {
   const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
   const [isPenaltyModalOpen, setIsPenaltyModalOpen] = React.useState(false);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = React.useState(false);
+  const [isActivityModalOpen, setIsActivityModalOpen] = React.useState(false);
   const [selectedUser, setSelectedUser] = React.useState<User | null>(null);
 
   const handleAddUser = (newUser: Omit<User, 'id' | 'penaltyPoints'>) => {
@@ -64,6 +66,11 @@ export default function AdminUsersPage() {
     setIsPenaltyModalOpen(true);
   };
 
+  const openActivityModal = (user: User) => {
+    setSelectedUser(user);
+    setIsActivityModalOpen(true);
+  };
+  
   const openDeleteAlert = (user: User) => {
     setSelectedUser(user);
     setIsDeleteAlertOpen(true);
@@ -146,7 +153,7 @@ export default function AdminUsersPage() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onSelect={() => openEditModal(user)}>Edit User</DropdownMenuItem>
-                      <DropdownMenuItem>View Activity</DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => openActivityModal(user)}>View Activity</DropdownMenuItem>
                       <DropdownMenuItem onSelect={() => openPenaltyModal(user)}>Adjust Penalties</DropdownMenuItem>
                       <DropdownMenuItem 
                         className="text-destructive"
@@ -213,6 +220,14 @@ export default function AdminUsersPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {selectedUser && (
+        <UserActivityDialog 
+            user={selectedUser}
+            isOpen={isActivityModalOpen}
+            onOpenChange={setIsActivityModalOpen}
+        />
+      )}
 
     </div>
   );
