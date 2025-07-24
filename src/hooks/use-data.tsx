@@ -57,6 +57,7 @@ interface DataContextType {
   addReservation: (itemId: string, userId: string, start: Date, end: Date, itemType: 'equipment' | 'room') => void;
   approveReservation: (reservationId: string) => void;
   declineReservation: (reservationId: string) => void;
+  completeReservation: (reservationId: string) => void;
 }
 
 export const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -232,14 +233,22 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     });
   }, [toast]);
 
-    const declineReservation = useCallback((reservationId: string) => {
+  const declineReservation = useCallback((reservationId: string) => {
     setReservations(prev => prev.map(r => r.id === reservationId ? { ...r, status: 'Declined' } : r));
     toast({
         title: "Reservation Declined",
         variant: "destructive",
         description: "The reservation has been declined."
     });
-    }, [toast]);
+  }, [toast]);
+
+  const completeReservation = useCallback((reservationId: string) => {
+    setReservations(prev => prev.map(r => r.id === reservationId ? { ...r, status: 'Completed' } : r));
+    toast({
+        title: "Reservation Completed",
+        description: "The item has been marked as returned."
+    });
+  }, [toast]);
 
   const value = {
     equipment,
@@ -258,6 +267,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     addReservation,
     approveReservation,
     declineReservation,
+    completeReservation,
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

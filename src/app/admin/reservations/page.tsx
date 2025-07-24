@@ -14,12 +14,12 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useData } from '@/hooks/use-data';
-import { Check, X } from 'lucide-react';
+import { Check, X, Undo2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function AdminReservationsPage() {
-  const { reservations, users, equipment, rooms, approveReservation, declineReservation } = useData();
+  const { reservations, users, equipment, rooms, approveReservation, declineReservation, completeReservation } = useData();
 
   const getItemName = (itemId: string, itemType: 'equipment' | 'room') => {
     const source = itemType === 'equipment' ? equipment : rooms;
@@ -61,7 +61,7 @@ export default function AdminReservationsPage() {
                     <TableHead>Start Date</TableHead>
                     <TableHead>End Date</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead className='w-[100px]'>Actions</TableHead>
+                    <TableHead className='w-[150px]'>Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -91,6 +91,12 @@ export default function AdminReservationsPage() {
                                       <X className="h-4 w-4" />
                                     </Button>
                                   </div>
+                                )}
+                                {res.status === 'Active' && (
+                                    <Button variant="outline" size="sm" onClick={() => completeReservation(res.id)}>
+                                        <Undo2 className='mr-2 h-4 w-4' />
+                                        Mark as Returned
+                                    </Button>
                                 )}
                               </TableCell>
                             </TableRow>
